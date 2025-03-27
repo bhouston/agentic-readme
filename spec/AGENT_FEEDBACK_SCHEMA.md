@@ -26,6 +26,11 @@ model AgentFeedback {
   metadata          Json              // Flexible metadata storage
   userId            String?
   user              User?             @relation(fields: [userId], references: [id])
+  ipAddress         String?           // IP address of the submitter
+  userAgent         String?           // User agent of the submitter
+  isAuthenticated   Boolean           @default(false) // Whether the submission was authenticated
+  submissionSource  String?           // Source of the submission (web, API, etc.)
+  moderationStatus  ModerationStatus  @default(PENDING) // Moderation status
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   categories        FeedbackCategory[]
@@ -104,6 +109,13 @@ enum IssueStatus {
   CLOSED
   MERGED
 }
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SPAM
+}
 ```
 
 ## Key Model Descriptions
@@ -121,6 +133,11 @@ The core model for storing feedback from AI agents. Each record represents a spe
 - **resolution**: How the issue was resolved (if at all)
 - **resolutionDetails**: Details about the resolution approach
 - **alternativeUsed**: If another library was used instead, its name
+- **ipAddress**: IP address of the submitter (for spam prevention)
+- **userAgent**: User agent of the submitter (for spam prevention)
+- **isAuthenticated**: Whether the submission was made by an authenticated user
+- **submissionSource**: Source of the submission (web, API, etc.)
+- **moderationStatus**: Status of the feedback in the moderation queue
 - **metadata**: Flexible JSON field for storing additional data like:
   - Agent name/identifier
   - LLM provider and model
@@ -157,5 +174,12 @@ Tracks GitHub issues created from feedback items, including their status and URL
 3. The voting system allows for community curation of feedback, helping to identify the most common or impactful issues.
 
 4. The GithubIssue model provides a bridge between aggregated feedback and actionable issues in the library's repository.
+
+5. **Spam Prevention**:
+   - IP address and user agent tracking helps identify and block spam submissions
+   - Moderation status allows for manual and automated review of submissions
+   - Authentication status prioritizes feedback from authenticated users
+   - Rate limiting should be implemented at the API level based on IP address and user ID
+   - Automated spam detection can be implemented using machine learning models
 
 This schema will be implemented in Phase 4 of the project, after the core functionality for documentation generation, verification, and versioning is complete.

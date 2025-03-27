@@ -22,20 +22,63 @@ The service is available as both:
 - **Progressive Enhancement**: Continuous improvement of documentation quality
 - **AI and Human Friendly**: Optimized for both human developers and AI coding assistants
 
+## Project Structure
+
+This project is structured as a monorepo using pnpm workspaces:
+
+- **packages/web**: Next.js web application with user interface and API endpoints
+- **packages/analyzer**: Package analyzer job that runs on Google Cloud Run Jobs
+- **packages/shared**: Shared code, types, and utilities used by both packages
+
+## Development
+
+### Prerequisites
+
+- Node.js 18 or later
+- pnpm 8 or later
+- Docker (for local container testing)
+- Google Cloud SDK (for deployment)
+
+### Setup
+
+```bash
+# Install pnpm if you don't have it
+npm install -g pnpm
+
+# Install dependencies
+pnpm install
+
+# Generate Prisma client
+pnpm prisma:generate
+
+# Start development server
+pnpm dev
+```
+
+### Docker Builds
+
+```bash
+# Build web container
+pnpm docker:build:web
+
+# Build analyzer container
+pnpm docker:build:analyzer
+
+# Run web container
+pnpm docker:run:web
+
+# Run analyzer container with environment variables
+pnpm docker:run:analyzer
+```
+
 ## Project Specification
 
 The project specification is maintained in the `/spec` directory:
 
-- [PROJECT_SPECIFICATION.md](./spec/PROJECT_SPECIFICATION.md) - Defines the project requirements, divided into:
-  - **User Instructions**: Direct requirements provided by the user
-  - **Inferred Requirements**: Requirements derived from user instructions
+- [PROJECT_SPECIFICATION.md](./spec/PROJECT_SPECIFICATION.md) - Defines the project requirements
+- [TECHNICAL_ARCHITECTURE.md](./spec/TECHNICAL_ARCHITECTURE.md) - Details the technical architecture
 
-- [TECHNICAL_ARCHITECTURE.md](./spec/TECHNICAL_ARCHITECTURE.md) - Details the technical architecture:
-  - System components and their implementation
-  - Data flow and processing pipelines
-  - Deployment architecture and infrastructure
-
-These specification documents serve as the source of truth for the project's purpose and design. They help maintain clarity as the project evolves and ensure that all contributors understand both the explicit requirements and the reasoning behind implementation decisions.
+These specification documents serve as the source of truth for the project's purpose and design.
 
 ## Development Status
 
