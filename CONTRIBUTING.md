@@ -145,6 +145,15 @@ The project uses GitHub Actions for continuous integration and deployment:
 
 Make sure all tests pass before creating a pull request.
 
+### Preview Environment
+
+The preview environment is available at:
+- **URL**: [https://preview-374802729603.us-central1.run.app](https://preview-374802729603.us-central1.run.app)
+- **Health Endpoint**: [https://preview-374802729603.us-central1.run.app/api/health](https://preview-374802729603.us-central1.run.app/api/health)
+- **MCP Endpoint**: [https://preview-374802729603.us-central1.run.app/api/mcp](https://preview-374802729603.us-central1.run.app/api/mcp)
+
+The preview environment is automatically updated when changes are merged into the main branch. You can use it to test your changes before deploying to production.
+
 ## Project Phases
 
 The project is divided into three phases:

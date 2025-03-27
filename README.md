@@ -41,6 +41,15 @@ These specification documents serve as the source of truth for the project's pur
 
 This project is currently in development. See [PLAN.md](./PLAN.md) for the roadmap and development phases, and the [GitHub Issues](https://github.com/bhouston/agentic-readme/issues) for specific tasks.
 
+### Preview Environment
+
+A preview environment is available at:
+- **URL**: [https://preview-374802729603.us-central1.run.app](https://preview-374802729603.us-central1.run.app)
+- **Health Endpoint**: [https://preview-374802729603.us-central1.run.app/api/health](https://preview-374802729603.us-central1.run.app/api/health)
+- **MCP Endpoint**: [https://preview-374802729603.us-central1.run.app/api/mcp](https://preview-374802729603.us-central1.run.app/api/mcp)
+
+The preview environment is automatically updated when changes are merged into the main branch.
+
 ## License
 
 MIT
