@@ -67,10 +67,14 @@ The final phase introduces:
 - **UI Components**: Headless UI + custom components
 
 ### Infrastructure
-- **Hosting**: Google Cloud Run
-- **Database**: Google Cloud SQL (PostgreSQL)
-- **CI/CD**: GitHub Actions
-- **Environments**: Preview (main branch) and Production (production branch)
+- **Hosting**: Google Cloud Run (single service for both web UI and API)
+- **Database**: 
+  - Google Cloud SQL (PostgreSQL) - separate instances for Preview and Production
+  - Minimum tier with SSD storage for cost efficiency
+- **CI/CD**: GitHub Actions with Docker builds
+- **Environments**: 
+  - Preview (main branch) - for testing and development
+  - Production (production branch) - for stable releases
 - **Monitoring**: Google Cloud Monitoring + custom analytics
 
 ## Database Schema (Prisma)

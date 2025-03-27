@@ -17,10 +17,8 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
-# Next.js collects anonymous telemetry data about general usage
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line to disable telemetry during the build
-# ENV NEXT_TELEMETRY_DISABLED 1
+# Disable telemetry during build
+ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN npm run build
 
@@ -29,8 +27,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
-# Uncomment the following line to disable telemetry during runtime
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -45,13 +42,17 @@ RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy Prisma schema and migrations for potential runtime migrations
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
 USER nextjs
 
-EXPOSE 3000
-
-ENV PORT 3000
+# Cloud Run will set PORT environment variable
+ENV PORT 8080
 ENV HOSTNAME "0.0.0.0"
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD wget -qO- http://localhost:$PORT/api/health || exit 1
+
 # server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD ["node", "server.js"]
