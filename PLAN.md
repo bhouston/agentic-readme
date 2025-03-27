@@ -36,7 +36,7 @@ This phase enhances the service with:
 
 ### Phase 3: Versioned Documentation
 
-The final phase introduces:
+This phase introduces:
 - Version-specific documentation for different releases of the same package
 - Differential analysis between versions to highlight changes
 - Full implementation of Model Context Protocol for AI consumption
@@ -48,6 +48,23 @@ The final phase introduces:
 2. **Differential Analyzer**: Identifies and highlights changes between versions
 3. **Model Context Protocol Server**: Implements the protocol for AI agent consumption
 4. **Advanced Web Interface**: Version navigation, comparison, and analytics
+
+### Phase 4: Agent Feedback System
+
+The final phase adds:
+- Structured feedback collection from AI agents about npm libraries
+- Aggregation and analysis of common issues and solutions
+- Insights generation for library authors
+- GitHub integration for converting feedback into issues
+- Authentication with multiple identity providers
+
+#### Key Components:
+1. **Feedback Collector**: API endpoints for receiving structured feedback from agents
+2. **Issue Categorizer**: Classifies feedback by type and severity
+3. **Feedback Aggregator**: Combines similar feedback to identify patterns
+4. **Insight Generator**: Creates actionable insights from aggregated feedback
+5. **Author Dashboard**: Interface for library authors to view feedback
+6. **GitHub Integration**: Converts aggregated feedback into GitHub issues
 
 ## Technical Architecture
 
@@ -109,7 +126,7 @@ model Readme {
   id              String   @id @default(uuid())
   packageVersionId String   @unique
   packageVersion   PackageVersion @relation(fields: [packageVersionId], references: [id])
-  content         String
+  content         String @db.Text
   verified        Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -137,12 +154,18 @@ enum VerificationStatus {
 
 // User models
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  name         String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  requests     Request[]
+  id              String   @id @default(uuid())
+  email           String   @unique
+  name            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  requests        Request[]
+  feedbackSubmitted AgentFeedback[]
+  feedbackVotes     FeedbackVote[]
+  authProvider    String?
+  authProviderId  String?
+  
+  @@unique([authProvider, authProviderId])
 }
 
 model Request {
@@ -162,6 +185,88 @@ enum RequestStatus {
   COMPLETED
   FAILED
 }
+
+// Agent Feedback models (Phase 4)
+model AgentFeedback {
+  id                String            @id @default(uuid())
+  packageName       String
+  packageVersion    String?
+  title             String
+  description       String            @db.Text
+  codeSnippet       String?           @db.Text
+  problemType       ProblemType
+  resolution        ResolutionType
+  resolutionDetails String?           @db.Text
+  alternativeUsed   String?
+  metadata          Json              // Flexible metadata storage
+  userId            String?
+  user              User?             @relation(fields: [userId], references: [id])
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  categories        FeedbackCategory[]
+  votes             FeedbackVote[]
+  githubIssue       GithubIssue?
+}
+
+model FeedbackCategory {
+  id              String          @id @default(uuid())
+  name            String
+  feedbackItems   AgentFeedback[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model FeedbackVote {
+  id              String        @id @default(uuid())
+  feedbackId      String
+  feedback        AgentFeedback @relation(fields: [feedbackId], references: [id])
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  vote            Int           // 1 for upvote, -1 for downvote
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([feedbackId, userId])
+}
+
+model GithubIssue {
+  id              String        @id @default(uuid())
+  feedbackId      String        @unique
+  feedback        AgentFeedback @relation(fields: [feedbackId], references: [id])
+  issueNumber     Int
+  issueUrl        String
+  repository      String
+  status          IssueStatus
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// Enums for Agent Feedback
+enum ProblemType {
+  DOCUMENTATION_UNCLEAR
+  DOCUMENTATION_MISSING
+  DOCUMENTATION_INCORRECT
+  API_DESIGN_CONFUSING
+  API_USAGE_DIFFICULT
+  UNEXPECTED_BEHAVIOR
+  PERFORMANCE_ISSUE
+  COMPATIBILITY_ISSUE
+  OTHER
+}
+
+enum ResolutionType {
+  FOUND_SOLUTION
+  WORKAROUND_IMPLEMENTED
+  USED_ALTERNATIVE_LIBRARY
+  ABANDONED_APPROACH
+  UNRESOLVED
+}
+
+enum IssueStatus {
+  OPEN
+  CLOSED
+  MERGED
+}
 ```
 
 ## API Endpoints
@@ -179,6 +284,27 @@ enum RequestStatus {
 ### Model Context Protocol Endpoints
 
 - `/mcp` - Model Context Protocol endpoint
+
+### Agent Feedback API (Phase 4)
+
+#### Feedback Management
+- `POST /api/feedback` - Submit new feedback about an npm library
+- `GET /api/feedback` - Retrieve feedback with filtering options
+- `GET /api/feedback/:id` - Get detailed information about specific feedback
+- `POST /api/feedback/:id/categories` - Add categories to existing feedback
+
+#### Voting and Interaction
+- `POST /api/feedback/:id/vote` - Vote on a feedback item
+
+#### Analytics and Insights
+- `GET /api/packages/:name/insights` - Get aggregated insights about a specific package
+
+#### GitHub Integration
+- `POST /api/feedback/:id/create-issue` - Create a GitHub issue from feedback
+
+#### Authentication
+- `POST /api/auth/login` - Authenticate with a provider (GitHub, GitLab, etc.)
+- `GET /api/auth/callback` - OAuth callback endpoint
 
 ## Implementation Plan
 
@@ -237,6 +363,34 @@ enum RequestStatus {
 - Add advanced analytics
 - Optimize performance
 - Enhance security
+- Final production deployment
+
+### Phase 4 Implementation (10-12 weeks)
+
+#### Week 1-2: Database Schema and Authentication
+- Implement feedback database schema
+- Create migrations for new tables
+- Set up OAuth authentication with multiple providers
+- Develop user profile management
+
+#### Week 3-5: Feedback API and Core Functionality
+- Implement feedback submission endpoints
+- Create feedback retrieval and filtering
+- Develop categorization system
+- Build voting mechanism
+
+#### Week 6-8: Web Interface and GitHub Integration
+- Create feedback submission interface
+- Build feedback explorer with filtering
+- Implement author dashboard
+- Develop GitHub issue creation and tracking
+
+#### Week 9-12: Analytics, Insights, and Optimization
+- Implement feedback aggregation algorithms
+- Create pattern detection for common issues
+- Develop insights generation for library authors
+- Build visualization components
+- Optimize performance and security
 - Final production deployment
 
 ## Monitoring and Maintenance

@@ -68,7 +68,25 @@ The Agentic README Service is a cloud-based system that automatically generates 
 - Diff generation algorithms
 - Version-specific storage and retrieval
 
-### 5. Web Interface
+### 5. Agent Feedback System (Phase 4)
+
+**Purpose**: Collect, analyze, and utilize feedback from AI agents about npm libraries.
+
+**Components**:
+- **Feedback Collector**: API endpoints for receiving structured feedback from agents
+- **Issue Categorizer**: Classifies feedback by type and severity
+- **Feedback Aggregator**: Combines similar feedback to identify patterns
+- **Insight Generator**: Creates actionable insights from aggregated feedback
+- **Author Dashboard**: Interface for library authors to view feedback
+
+**Implementation**:
+- RESTful API endpoints for feedback submission
+- Natural language processing for categorization and summarization
+- Integration with authentication providers (GitHub, GitLab)
+- Cloud-based analytics for pattern detection
+- Results stored in PostgreSQL database
+
+### 6. Web Interface
 
 **Purpose**: Provide human users with access to the service.
 
@@ -77,6 +95,8 @@ The Agentic README Service is a cloud-based system that automatically generates 
 - **Documentation Display**: View generated documentation
 - **Request Form**: Request documentation for new packages
 - **User Dashboard**: Track requests and favorites
+- **Feedback Explorer**: Browse and analyze agent feedback
+- **Author Dashboard**: View feedback about owned libraries
 
 **Implementation**:
 - Next.js with App Router
@@ -84,19 +104,21 @@ The Agentic README Service is a cloud-based system that automatically generates 
 - Tailwind CSS for styling
 - SWR for data fetching
 
-### 6. API System
+### 7. API System
 
 **Purpose**: Provide programmatic access to the service.
 
 **Components**:
 - **REST API**: Standard endpoints for service interaction
 - **Model Context Protocol Server**: AI-optimized access
-- **Authentication**: Secure API access
+- **Feedback API**: Endpoints for submitting and retrieving agent feedback
+- **Authentication**: Secure API access with OAuth providers
 - **Rate Limiting**: Prevent abuse
 
 **Implementation**:
 - Next.js API routes
 - Model Context Protocol implementation
+- OAuth 2.0 with multiple providers
 - JWT authentication
 
 ## Data Flow
@@ -117,6 +139,18 @@ The Agentic README Service is a cloud-based system that automatically generates 
    ```
    Version Change Detection → Differential Analysis → 
    Version-Specific Documentation → Database Storage
+   ```
+
+4. **Agent Feedback Flow** (Phase 4):
+   ```
+   Agent Experience → Feedback Submission → Categorization → Aggregation → 
+   Insight Generation → Database Storage → Author Dashboard/API
+   ```
+
+5. **Feedback-to-Issue Flow** (Phase 4):
+   ```
+   Aggregated Feedback → Pattern Detection → Issue Prioritization → 
+   GitHub Issue Creation → Library Author Notification
    ```
 
 ## Database Schema
