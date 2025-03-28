@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core models
+model Package {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  versions     PackageVersion[]
+  
+  @@unique([name])
+}
+
+model PackageVersion {
+  id           String   @id @default(uuid())
+  version      String
+  packageId    String
+  package      Package  @relation(fields: [packageId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  readme       Readme?
+  verifications Verification[]
+  
+  @@unique([packageId, version])
+}
+
+model Readme {
+  id              String   @id @default(uuid())
+  packageVersionId String   @unique
+  packageVersion   PackageVersion @relation(fields: [packageVersionId], references: [id])
+  content         String @db.Text
+  verified        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  generationJobId String?
+  verificationJobId String?
+}
+
+model Verification {
+  id              String   @id @default(uuid())
+  packageVersionId String
+  packageVersion   PackageVersion @relation(fields: [packageVersionId], references: [id])
+  status          VerificationStatus
+  results         Json
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  jobId           String?
+}
+
+enum VerificationStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+// User models
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  requests     Request[]
+}
+
+model Request {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  packageName  String
+  version      String?
+  status       RequestStatus
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+enum RequestStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

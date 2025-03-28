@@ -201,6 +201,11 @@ model AgentFeedback {
   metadata          Json              // Flexible metadata storage
   userId            String?
   user              User?             @relation(fields: [userId], references: [id])
+  ipAddress         String?           // IP address of the submitter
+  userAgent         String?           // User agent of the submitter
+  isAuthenticated   Boolean           @default(false) // Whether the submission was authenticated
+  submissionSource  String?           // Source of the submission (web, API, etc.)
+  moderationStatus  ModerationStatus  @default(PENDING) // Moderation status
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   categories        FeedbackCategory[]
@@ -266,6 +271,13 @@ enum IssueStatus {
   OPEN
   CLOSED
   MERGED
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SPAM
 }
 ```
 

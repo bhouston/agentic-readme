@@ -202,6 +202,84 @@ Get aggregated insights about a specific package.
 }
 ```
 
+### Moderation
+
+#### `GET /api/moderation/feedback`
+
+Retrieve feedback items for moderation (requires admin permissions).
+
+**Query Parameters:**
+- `status` (enum): Filter by moderation status
+- `page` (number): Page number for pagination
+- `limit` (number): Items per page
+
+**Response:**
+```json
+{
+  "total": 87,
+  "page": 1,
+  "limit": 20,
+  "data": [
+    {
+      "id": "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454",
+      "packageName": "axios",
+      "title": "Confusing error handling documentation",
+      "moderationStatus": "PENDING",
+      "isAuthenticated": false,
+      "ipAddress": "192.168.1.1",
+      "createdAt": "2025-03-27T19:42:17.123Z"
+    },
+    // ... more feedback items
+  ]
+}
+```
+
+#### `PUT /api/moderation/feedback/:id`
+
+Update the moderation status of a feedback item (requires admin permissions).
+
+**Request Body:**
+```json
+{
+  "moderationStatus": "APPROVED"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "id": "f8c3de3d-1fea-4d7c-a8b0-29f63c4c3454",
+  "moderationStatus": "APPROVED"
+}
+```
+
+#### `POST /api/moderation/spam/rules`
+
+Create or update spam detection rules (requires admin permissions).
+
+**Request Body:**
+```json
+{
+  "type": "IP_RATE_LIMIT",
+  "value": "100",
+  "timeFrame": "1h",
+  "action": "BLOCK"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "id": "rule-123",
+  "type": "IP_RATE_LIMIT",
+  "value": "100",
+  "timeFrame": "1h",
+  "action": "BLOCK"
+}
+```
+
 ### GitHub Issue Management
 
 #### `POST /api/feedback/:id/create-issue`
@@ -292,12 +370,43 @@ Common error codes:
 - `RATE_LIMITED`: Too many requests
 - `INTERNAL_ERROR`: Server error
 
-## Rate Limiting
+## Rate Limiting and Spam Prevention
+
+### Rate Limiting
 
 To prevent abuse, the API implements rate limiting:
 - Unauthenticated requests: 60 requests per hour
 - Authenticated requests: 1000 requests per hour
 - Feedback submission: 100 per day per user
+
+### Spam Prevention
+
+The API includes several mechanisms to prevent and detect spam:
+
+1. **IP Tracking and Blocking**:
+   - All submissions store the submitter's IP address
+   - Automated blocking of IPs that exceed rate limits
+   - Manual blocking of IPs associated with spam
+
+2. **Authentication Prioritization**:
+   - Feedback from authenticated users is prioritized
+   - Unauthenticated submissions undergo additional scrutiny
+   - OAuth authentication helps verify user identity
+
+3. **Content Filtering**:
+   - Automated detection of spam patterns in content
+   - Filtering of inappropriate content
+   - Similarity detection to prevent duplicate submissions
+
+4. **Moderation Queue**:
+   - All submissions start with PENDING moderation status
+   - Administrators can approve or reject submissions
+   - Automated approval for trusted users
+
+5. **Progressive Penalties**:
+   - First-time offenders receive temporary blocks
+   - Repeat offenders receive longer blocks
+   - Persistent spammers are permanently blocked
 
 ## Authentication and Authorization
 
